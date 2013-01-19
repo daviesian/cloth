@@ -1,0 +1,52 @@
+body
+{
+    height: 100%;
+    margin: 0;
+}
+
+#outputFiller
+{
+    height: 100%;
+}
+#outputPanel
+{
+    position:absolute;
+    bottom: 0;
+    height: 30%;
+    width: 100%;
+    background: #eee8d5;
+    border-top: 1px #999 solid;
+    margin-top: 10px;
+    overflow: auto;
+
+}
+
+
+.CodeMirror
+{
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 70%;
+
+}
+
+.outputBlock
+{
+    margin-top: 0px;
+    margin-left: 55px;
+    background: #fdf6e3;
+}
+
+.outputSeparator
+{
+    margin-left: 1px;
+    width: 100%;
+    height: 1px;
+    background-color: #aaa;
+}
+
+.outputError
+{
+    color: #a00;
+}
