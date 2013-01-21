@@ -21,8 +21,10 @@
       (cons head 
             (cons sep 
                   (separate sep tail))))))
-
 (join-strs 
  (separate " "
   (map to-upper 
        (my-reverse ["The" "quick" "brown" "fox" "jumped" "over" "the" "lazy" "dog"]))))
+
+(map count ["The" "quick" "brown" "fox" "jumped" "over" "the" "lazy" "dog"])
+(filter (fn [s] (> 4 (count s))) ["The" "quick" "brown" "fox" "jumped" "over" "the" "lazy" "dog"])

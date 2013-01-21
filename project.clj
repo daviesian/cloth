@@ -7,4 +7,5 @@
                  [compojure "1.1.5"]
                  [aleph "0.3.0-beta7"]
                  [hiccup "1.0.0"]
-                 [org.clojure/data.json "0.2.0"]])
+                 [org.clojure/data.json "0.2.0"]
+                 [clojail "1.0.3"]])

@@ -7,9 +7,12 @@
         [compojure.route]
         [hiccup.core]
         [hiccup.page]
-        [hiccup.form])
+        [hiccup.form]
+        [clojail.core :only [sandbox]]
+        [clojail.testers :only [secure-tester-without-def blacklist-symbols blacklist-objects]])
   (:require [clojure.data.json :as json]))
 
+(def sb (sandbox secure-tester-without-def))
 
 (def current-code (atom {}))
 
@@ -69,12 +72,12 @@
                          (binding [*print-length* 20]
                            (let [err (java.io.StringWriter.)
                                  out (java.io.StringWriter.)
-                                 ast (try (read-string (str "(binding [*ns* 'cloth.core] " (get @current-code code-file) "\n)"))
+                                 ast (try (read-string (str "(do " (get @current-code code-file) "\n)"))
                                           (catch Exception e
                                             (binding [*out* err]
                                               (println "Read error:" (.toString e)))))
                                  ans (try (binding [*out* out]
-                                            (print-str (eval ast)))
+                                            (print-str (sb ast)))
                                           (catch Exception e
                                             (binding [*out* err]
                                               (println "Eval error:" (.toString e)))))
