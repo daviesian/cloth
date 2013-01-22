@@ -48,6 +48,41 @@
 
 (def clients (atom {}))
 
+
+
+
+(defmulti op-handler (fn [ch code-file msg] (get msg "op")))
+
+(defmethod op-handler :default [ch code-file msg]
+  (println "Unknown operation:" (get msg "op")))
+
+(defmethod op-handler "save-file" [ch code-file msg]
+  (let [file-name (str "files/" code-file)
+        content   (get @current-code code-file)]
+    (spit file-name content)))
+
+(defmethod op-handler "code-change" [ch code-file msg]
+  (swap! current-code assoc code-file (get msg "code"))
+  (forward-to-all-others ch (get @clients code-file) (json/write-str msg)))
+
+(defmethod op-handler "eval-all" [ch code-file msg]
+  (binding [*print-length* 20]
+    (let [err (java.io.StringWriter.)
+          out (java.io.StringWriter.)
+          ast (try (read-string (str "(do " (get @current-code code-file) "\n)"))
+                   (catch Exception e
+                     (binding [*out* err]
+                       (println "Read error:" (.toString e)))))
+          ans (try (print-str (sb ast {#'*out* out}))
+                   (catch Exception e
+                     (binding [*out* err]
+                       (println "Eval error:" (.toString e)))))
+          resp (json/write-str {"op" "eval-result"
+                                "ans" ans
+                                "output" (str out)
+                                "error" (str err)})]
+      (forward-to-all-others nil (get @clients code-file) resp))))
+
 (defn websocket-handler [code-file ch handshake]
   (swap! clients (fn [old]
                    (assoc old code-file (conj (if-let [prev (get old code-file)]
@@ -56,36 +91,8 @@
                                               ch))))
 
   (receive-all ch (fn [msg]
-                    (println msg)
-                    (let [obj (json/read-str msg)
-                          op (get obj "op")]
-                      (cond
-                       (= op "save-file")
-                       (do
-                         (spit (str "files/" code-file) (get @current-code code-file)))
-                       (= op "code-change")
-                       (do
-                         (swap! current-code assoc code-file (get obj "code"))
-                         (forward-to-all-others ch (get @clients code-file) msg))
-                       (= op "eval-all")
-                       (do
-                         (binding [*print-length* 20]
-                           (let [err (java.io.StringWriter.)
-                                 out (java.io.StringWriter.)
-                                 ast (try (read-string (str "(do " (get @current-code code-file) "\n)"))
-                                          (catch Exception e
-                                            (binding [*out* err]
-                                              (println "Read error:" (.toString e)))))
-                                 ans (try (binding [*out* out]
-                                            (print-str (sb ast)))
-                                          (catch Exception e
-                                            (binding [*out* err]
-                                              (println "Eval error:" (.toString e)))))
-                                 resp (json/write-str {"op" "eval-result"
-                                                       "ans" ans
-                                                       "output" (str out)
-                                                       "error" (str err)})]
-                             (forward-to-all-others nil (get @clients code-file) resp))))))))
+                    (let [obj (json/read-str msg)]
+                      (op-handler ch code-file obj))))
 
   (on-closed ch #(swap! clients (fn [old]
                                   (assoc old code-file (disj (get old code-file) ch))))))
