@@ -27,7 +27,7 @@
                 "/cm/mode/clojure/clojure.js"
                 "/cm/lib/util/matchbrackets.js"
                 "https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"
-                "js/cloth.js")]
+                "/js/cloth.js")]
    [:body
     [:script (str "var file = \"" file "\";")]
 
@@ -56,7 +56,7 @@
 
 (defroutes server-routes
   (GET "/" [] (#'gen-file-page "index.clj"))
-  (GET "/:file" [file] (#'gen-file-page file))
+  (GET "/cloth/:file" [file] (#'gen-file-page file))
   (GET "/socket/:file" [file] (wrap-aleph-handler (partial websocket-handler file)))
   (files "/cm/" {:root "codemirror-3.0"})
   (files "/js/" {:root "src-js"})
@@ -64,7 +64,7 @@
   (not-found "Page not found."))
 
 (defn log-request [req]
-  (println "REQ:" (:uri req))
+  (println "REQ FROM" (:remote-addr req) ":" (:uri req))
   (flush))
 
 (defn wrap-logger [aleph-handler]

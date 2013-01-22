@@ -6,7 +6,7 @@
         op   (get obj "op")
         args (assoc (get obj "args") "context" context)]
 
-    (if-let [f (ns-resolve ns (symbol op))]
+    (if-let [f (ns-resolve ns (symbol (str ns "/" op)))]
       (let [arglists (:arglists (meta f))
             arglist (first arglists)
             vals (map #(get args (name %)) arglist)]
@@ -14,4 +14,4 @@
           (println "RPC Dispatch doesn't support overloaded functions.")
           (do (println "Dispatch op:" op)
               (apply f vals))))
-      (println "No matching RPC function found."))))
+      (println "No matching RPC function found:" op))))

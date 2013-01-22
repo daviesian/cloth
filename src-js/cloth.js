@@ -8,11 +8,37 @@ function delCharAfterFixed(cm) {
 }
 
 function evalAll(cm) {
+    CodeMirror.commands.selectAll(cm);
     socket.send(JSON.stringify({op: "eval-all"}));
 }
 function saveFile(cm) {
     socket.send(JSON.stringify({op: "save-file"}));
 }
+function evalSexp(cm)
+{
+    if (cm.getTokenAt(cm.getCursor()).state.indentStack == null)
+    {
+        console.log("Not in a form");
+        return;
+    }
+
+    while(cm.getTokenAt(cm.getCursor()).state.indentStack != null)
+        cm.moveH(-1,"char");
+
+    var start = cm.getCursor();
+
+    cm.moveH(1, "char");
+
+    while(cm.getTokenAt(cm.getCursor()).state.indentStack != null)
+        cm.moveH(1,"char");
+
+    var end  = cm.getCursor();
+
+    cm.setSelection(start, end);
+
+    socket.send(JSON.stringify({op: "eval-form", args: {form: cm.getSelection()}}));
+}
+
 
 CodeMirror.commands["delCharAfter"] = delCharAfterFixed;
 
@@ -40,6 +66,7 @@ function replaceNewlines(str)
     return str.replace(/\r/g,"").replace(/\n/g, "<br/>");
 }
 
+
 $(function() {
 
     editor = CodeMirror.fromTextArea(document.getElementById("codeArea"), {
@@ -48,7 +75,8 @@ $(function() {
         matchBrackets: true,
         extraKeys: {"Tab": "indentAuto",
                     "Ctrl-E": evalAll,
-                    "Ctrl-S": saveFile}
+                    "Ctrl-S": saveFile,
+                    "Ctrl-Alt-X": evalSexp}
     });
 
     socket = new WebSocket("ws://" + window.location.host + "/socket/" + file);
@@ -59,9 +87,9 @@ $(function() {
             socket.send(JSON.stringify(
                 {op: "code-change",
                  args: { code: inst.getValue(),
-						 head: inst.getCursor("head"),
-						 anchor: inst.getCursor("anchor")
-					   }
+                         head: inst.getCursor("head"),
+                         anchor: inst.getCursor("anchor")
+                       }
                 }));
     });
 
@@ -84,6 +112,9 @@ $(function() {
                 appendOutput(replaceNewlines(msg.output));
             appendOutput(replaceNewlines(msg.ans));
             break;
+        case "message":
+            separateOutput();
+            appendOutput(replaceNewlines(msg.message)).addClass("outputMessage");
         }
     };
 
