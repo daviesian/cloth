@@ -58,9 +58,10 @@ $(function() {
         if (!progUpdate)
             socket.send(JSON.stringify(
                 {op: "code-change",
-                 code: inst.getValue(),
-                 head: inst.getCursor("head"),
-                 anchor: inst.getCursor("anchor")
+                 args: { code: inst.getValue(),
+						 head: inst.getCursor("head"),
+						 anchor: inst.getCursor("anchor")
+					   }
                 }));
     });
 
@@ -71,8 +72,8 @@ $(function() {
         case "code-change":
 
             progUpdate = true;
-            editor.setValue(msg.code);
-            editor.setSelection(msg.anchor, msg.head);
+            editor.setValue(msg.args.code);
+            editor.setSelection(msg.args.anchor, msg.args.head);
             progUpdate = false;
             break;
         case "eval-result":
