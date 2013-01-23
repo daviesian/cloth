@@ -13,7 +13,7 @@
 
 (defn code-change [head code anchor context]
   (swap! current-code assoc (context :code-file) code)
-  (forward-to-all-others (context :channel) (get @clients (context :code-file)) (json/write-str (context :msg))))
+  (forward-to-all-others (context :channel) (get @clients (context :code-file)) (context :msg)))
 
 
 (defn eval-form [context form]

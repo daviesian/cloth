@@ -3,6 +3,7 @@
         [cloth.init]
         [cloth.server-state]
         [cloth.utils]
+        [cloth.rpc]
         [cloth.rpc-dispatch]
         [aleph.http]
         [lamina.core]
@@ -11,7 +12,8 @@
         [hiccup.core]
         [hiccup.page]
         [hiccup.form])
-  (:require [clojure.data.json :as json]))
+  (:require [clojure.data.json :as json])
+  (:gen-class))
 
 (defn gen-file-page [file]
   (when-not (.exists (java.io.File. (str "files/" file)))
@@ -72,4 +74,9 @@
     (#'log-request req)
     (aleph-handler resp-ch req)))
 
-(start-http-server (wrap-logger (wrap-ring-handler #'server-routes)) {:port 8080 :websocket true})
+(defn start-server []
+  (start-http-server (wrap-logger (wrap-ring-handler #'server-routes)) {:port 8080 :websocket true}))
+
+(defn -main [& args]
+  (start-server)
+  (println "Server running."))
