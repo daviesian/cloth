@@ -5,7 +5,6 @@
   (let [obj  (json/read-str msg)
         op   (get obj "op")
         args (assoc (get obj "args") "context" context)]
-
     (if-let [f (ns-resolve ns (symbol (str ns "/" op)))]
       (let [arglists (:arglists (meta f))
             arglist (first arglists)

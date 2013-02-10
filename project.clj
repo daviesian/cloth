@@ -8,5 +8,14 @@
                  [aleph "0.3.0-beta7"]
                  [hiccup "1.0.0"]
                  [org.clojure/data.json "0.2.0"]
-                 [clojail "1.0.3"]]
+                 [clojail "1.0.3"]
+                 [jayq "2.2.0"]
+                 [crate "0.2.4"]]
+
+  :plugins [[lein-cljsbuild "0.3.0"]]
+  :cljsbuild {:builds [{:source-paths ["src-cljs"]
+                        :compiler     {:output-to "js-generated/main.js"
+                                       :optimizations :whitespace
+                                       :pretty-print true}}]}
+
   :main cloth.core)

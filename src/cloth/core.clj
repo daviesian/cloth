@@ -29,9 +29,9 @@
                 "/cm/mode/clojure/clojure.js"
                 "/cm/lib/util/matchbrackets.js"
                 "https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"
-                "/js/cloth.js")]
+                "/js/main.js")]
    [:body
-    [:script (str "var file = \"" file "\";")]
+    [:script (str "var cloth.jscore.file = \"" file "\";")]
 
     [:form
      (text-area "codeArea" (get @current-code file))]
@@ -61,7 +61,7 @@
   (GET "/cloth/:file" [file] (#'gen-file-page file))
   (GET "/socket/:file" [file] (wrap-aleph-handler (partial websocket-handler file)))
   (files "/cm/" {:root "codemirror-3.0"})
-  (files "/js/" {:root "src-js"})
+  (files "/js/" {:root "js-generated"})
   (files "/css/" {:root "css"})
   (not-found "Page not found."))
 
