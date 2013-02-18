@@ -7,7 +7,7 @@
         content   (get @current-code (context :code-file))]
     (spit file-name content)
     (let [resp (pr-str {:op :message
-                        :message (str "File saved: " (context :code-file)) })]
+                        :args {:message (str "File saved: " (context :code-file))} })]
       (forward-to-all-others nil (get @clients (context :code-file)) resp))))
 
 (defn code-change [head code anchor context]
@@ -28,9 +28,9 @@
                      (binding [*out* err]
                        (println "Eval error:" (.toString e)))))
           resp (pr-str {:op :eval-result
-                        :ans ans
-                        :output (str out)
-                        :error (str err)})]
+                        :args {:ans ans
+                               :output (str out)
+                               :error (str err)}})]
       (forward-to-all-others nil (get @clients (context :code-file)) resp))))
 
 (defn eval-all [context]
