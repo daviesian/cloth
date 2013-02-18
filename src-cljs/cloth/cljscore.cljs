@@ -85,8 +85,8 @@
                                      (.send @socket
                                             (pr-str {:op :code-change
                                                      :args {:code (.getValue inst)
-                                                            :head (JSON/stringify (.getCursor inst "head"))
-                                                            :anchor (JSON/stringify (.getCursor inst "anchor"))}})))))
+                                                            :head (js->clj (.getCursor inst "head"))
+                                                            :anchor (js->clj (.getCursor inst "anchor"))}})))))
 
 
    (set! (.-onmessage @socket)
@@ -95,7 +95,7 @@
              (cond
               (= (:op msg) :code-change) (do (reset! prog-update true)
                                                (.setValue @editor (:code (:args msg)))
-                                               (.setSelection @editor (JSON/parse (:anchor (:args msg))) (JSON/parse (:head (:args msg))))
+                                               (.setSelection @editor (clj->js (:anchor (:args msg))) (clj->js (:head (:args msg))))
                                                (reset! prog-update false))
               (= (:op msg) :eval-result) (do (separate-output)
                                                (when (not-empty (:error msg))
@@ -107,4 +107,4 @@
                                            (.addClass (append-output (replace-newlines (:message msg))) "outputMessage"))
               :else (log (str "Unknown message: " msg))))))
 
-   ))
+   (.focus @editor)))
