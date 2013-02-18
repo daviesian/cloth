@@ -2,7 +2,7 @@
   (:require [clojure.edn :as edn]))
 
 (defn dispatch [ns msg context]
-  (let [_ (println obj)
+  (let [_ (println msg)
         obj  (edn/read-string msg)
         _ (println obj)
         op   (:op obj)

@@ -1,14 +1,13 @@
 (ns cloth.rpc
   (:use [cloth.server-state]
-        [cloth.utils])
-  (:require [clojure.data.json :as json]))
+        [cloth.utils]))
 
 (defn save-file [context]
   (let [file-name (str "files/" (context :code-file))
         content   (get @current-code (context :code-file))]
     (spit file-name content)
-    (let [resp (json/write-str {"op" "message"
-                                "message" (str "File saved: " (context :code-file)) })]
+    (let [resp (pr-str {:op :message
+                        :message (str "File saved: " (context :code-file)) })]
       (forward-to-all-others nil (get @clients (context :code-file)) resp))))
 
 (defn code-change [head code anchor context]
@@ -28,10 +27,10 @@
                    (catch Exception e
                      (binding [*out* err]
                        (println "Eval error:" (.toString e)))))
-          resp (json/write-str {"op" "eval-result"
-                                "ans" ans
-                                "output" (str out)
-                                "error" (str err)})]
+          resp (pr-str {:op :eval-result
+                        :ans ans
+                        :output (str out)
+                        :error (str err)})]
       (forward-to-all-others nil (get @clients (context :code-file)) resp))))
 
 (defn eval-all [context]
