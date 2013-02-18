@@ -12,7 +12,6 @@
         [hiccup.core]
         [hiccup.page]
         [hiccup.form])
-  (:require [clojure.data.json :as json])
   (:gen-class))
 
 (defn gen-file-page [file]
@@ -45,6 +44,7 @@
 
 
 (defn websocket-handler [code-file ch handshake]
+  (enqueue ch (pr-str {:op :thing :val 42}))
   (swap! clients (fn [old]
                    (assoc old code-file (conj (if-let [prev (get old code-file)]
                                                 prev

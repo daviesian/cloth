@@ -18,7 +18,7 @@
 
 (defn eval-all [cm]
   (.selectAll CodeMirror/commands cm)
-  (.send @socket (JSON/stringify (js-obj "op" "eval-all"))))
+  (.send @socket (pr-str {:op :eval-all})))
 
 (defn eval-sexp [cm]
   (if-not (-> cm (.getTokenAt (.getCursor cm))
@@ -42,12 +42,12 @@
 
           (.setSelection cm start end)
 
-          (.send @socket (JSON/stringify (js-obj "op" "eval-form"
-                                                 "args" (js-obj "form" (.getSelection cm)))))
+          (.send @socket (pr-str {:op :eval-form
+                                  :args {:form (.getSelection cm)}}))
           )))))
 
 (defn save-file []
-  (.send @socket (JSON/stringify (js-obj "op" "save-file"))))
+  (.send @socket (pr-str {:op :save-file})))
 
 (defn replace-newlines [s]
   (.replace (.replace s #"\r" "") "#\n" "<br />"))
@@ -64,6 +64,7 @@
 
 (defn separate-output []
   (.addClass (append-output "") "outputSeparator"))
+
 
 (document-ready
  (fn []
@@ -82,29 +83,28 @@
    (.on @editor "cursorActivity" (fn [inst]
                                    (when-not @prog-update
                                      (.send @socket
-                                            (JSON/stringify
-                                             (js-obj "op" "code-change"
-                                                     "args" (js-obj "code" (.getValue inst)
-                                                                    "head" (.getCursor inst "head")
-                                                                    "anchor" (.getCursor inst "anchor"))))))))
+                                            (pr-str {:op :code-change
+                                                     :args {:code (.getValue inst)
+                                                            :head (JSON/stringify (.getCursor inst "head"))
+                                                            :anchor (JSON/stringify (.getCursor inst "anchor"))}})))))
 
 
    (set! (.-onmessage @socket)
          (fn [msg]
-           (let [msg (JSON/parse (.-data msg))]
+           (let [msg (cljs.reader/read-string (.-data msg))]
              (cond
-              (= (.-op msg) "code-change") (do (reset! prog-update true)
-                                               (.setValue @editor (.-code (.-args msg)))
-                                               (.setSelection @editor (.-anchor (.-args msg)) (.-head (.-args msg)))
+              (= (:op msg) :code-change) (do (reset! prog-update true)
+                                               (.setValue @editor (:code (:args msg)))
+                                               (.setSelection @editor (JSON/parse (:anchor (:args msg))) (JSON/parse (:head (:args msg))))
                                                (reset! prog-update false))
-              (= (.-op msg) "eval-result") (do (separate-output)
-                                               (when (not-empty (.-error msg))
-                                                 (.addClass (append-output (replace-newlines (.-error msg))) "outputError"))
-                                               (when (not-empty (.-output msg))
-                                                 (append-output (replace-newlines (.-output msg))))
-                                               (append-output (replace-newlines (.-ans msg))))
-              (= (.-op msg) "message") (do (separate-output)
-                                           (.addClass (append-output (replace-newlines (.-message msg))) "outputMessage"))))))
+              (= (:op msg) :eval-result) (do (separate-output)
+                                               (when (not-empty (:error msg))
+                                                 (.addClass (append-output (replace-newlines (:error msg))) "outputError"))
+                                               (when (not-empty (:output msg))
+                                                 (append-output (replace-newlines (:output msg))))
+                                               (append-output (replace-newlines (:ans msg))))
+              (= (:op msg) :message) (do (separate-output)
+                                           (.addClass (append-output (replace-newlines (:message msg))) "outputMessage"))
+              :else (log (str "Unknown message: " msg))))))
 
-
-   (log (JSON/stringify (js-obj "A" 1)))))
+   ))

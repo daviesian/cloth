@@ -2,6 +2,7 @@
 /lib
 /classes
 /checkouts
+/js-generated
 pom.xml
 *.jar
 *.class
