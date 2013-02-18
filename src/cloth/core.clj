@@ -28,16 +28,17 @@
     (include-js "/cm/lib/codemirror.js"
                 "/cm/mode/clojure/clojure.js"
                 "/cm/lib/util/matchbrackets.js"
-                "https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"
-                "/js/main.js")]
+                "https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js")]
    [:body
-    [:script (str "var cloth.jscore.file = \"" file "\";")]
+    [:script (str "var file = \"" file "\";")]
 
     [:form
      (text-area "codeArea" (get @current-code file))]
 
     [:div {:id "outputPanel"}
-     [:div {:id "outputFiller"}]]]))
+     [:div {:id "outputFiller"}]]
+
+    (include-js "/js/main.js")]))
 
 
 

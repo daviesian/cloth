@@ -1,4 +1,4 @@
-(ns cloth.jscore
+(ns cloth.cljscore
   (:use [jayq.core :only [$ document-ready append-to]])
   (:require [crate.core :as crate]))
 
@@ -52,9 +52,6 @@
 (defn replace-newlines [s]
   (.replace (.replace s #"\r" "") "#\n" "<br />"))
 
-(defn separate-output []
-  (.addClass (append-output "") "outputSeparator"))
-
 (defn append-output [o]
   (let [new-div ($ (crate/html [:div {:class "outputBlock cm-s-solarized"} o]))]
     (append-to
@@ -65,12 +62,15 @@
 
     new-div))
 
+(defn separate-output []
+  (.addClass (append-output "") "outputSeparator"))
+
 (document-ready
  (fn []
 
    (reset! editor (CodeMirror/fromTextArea (first ($ :#codeArea))
                                            (js-obj "lineNumbers" true
-                                                   "theme" "solarized dark"
+                                                   "theme" "solarized light"
                                                    "matchBrackets" true
                                                    "extraKeys" (js-obj "Tab" "indentAuto"
                                                                        "Ctrl-E" eval-all
